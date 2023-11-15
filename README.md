@@ -1,11 +1,11 @@
-# react-swc-module-template
+# EasyCharts
 
 [![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)](https://github.com/tohsaka888/create-react-swc-app/blob/master/LICENSE)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 
 ## introduction
 
-help you build a `react` module with `swc` and `webpack`.
+TODO
 
 ## Output
 
