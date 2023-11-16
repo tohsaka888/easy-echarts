@@ -9,7 +9,6 @@ type Props = {
 function Chart({ dataSource }: { dataSource: any[] }) {
   const chartRef = useRef<HTMLDivElement>(null!);
   const config = useChartConfig();
-  console.log(config);
 
   useEffect(() => {
     if (chartRef.current) {
@@ -32,6 +31,14 @@ function Chart({ dataSource }: { dataSource: any[] }) {
           top: 60,
           containLabel: true,
         },
+        brush: {
+          toolbox: ["rect", "lineX", "lineY", "clear"],
+        },
+        dataZoom: [
+          {
+            type: "inside",
+          },
+        ],
         toolbox: {
           feature: {
             dataView: { show: true, readOnly: false },
@@ -49,6 +56,9 @@ function Chart({ dataSource }: { dataSource: any[] }) {
         xAxis: [
           {
             type: "category",
+            axisLabel: {
+              rotate: config.xAxisOptions.rotate,
+            },
             data: dataSource.map((data) => data[config.xAxisOptions.field]),
             axisPointer: {
               type: "shadow",

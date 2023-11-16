@@ -7,6 +7,7 @@ export type BarLineChartConfig = {
   type: "barLine";
   xAxisOptions: {
     field: string;
+    rotate?: number;
   };
   yAxisOptions: {
     field: string[];

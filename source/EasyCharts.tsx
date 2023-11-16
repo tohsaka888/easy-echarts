@@ -8,7 +8,7 @@ import { EasyChartsProps } from ".";
 function EasyCharts(config: EasyChartsProps) {
   return (
     <ChartConfigProvider initialValues={config}>
-      <ConfigArea />
+      <ConfigArea dataSource={config.dataSource} />
       <Chart dataSource={config.dataSource} />
     </ChartConfigProvider>
   );
