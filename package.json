@@ -18,7 +18,7 @@
     "echarts": "^5.4.3",
     "html-webpack-plugin": "5.5.3",
     "mini-css-extract-plugin": "2.7.6",
-    "postcss": "8.4.31",
+    "postcss": "8.4.32",
     "postcss-loader": "7.3.3",
     "react": "18.2.0",
     "react-dom": "18.2.0",
