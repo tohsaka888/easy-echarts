@@ -9,6 +9,8 @@ import {
   InputNumber,
   Divider,
   Select,
+  message,
+  Radio,
 } from "antd";
 import { useChartConfig, useDispatchChartConfig } from "./ChartConfigProvider";
 import { produce } from "immer";
@@ -37,10 +39,13 @@ function ConfigArea({ dataSource }: { dataSource: any[] }) {
         ([_, value]) => typeof value === "number"
       );
 
-      return numberEntries.flatMap(([key]) => [
-        { label: `(自动计算总和)${key}`, value: `sum_${key}` },
-        { label: `(自动计算平均)${key}`, value: `avg_${key}` },
-      ]);
+      return [
+        ...numberEntries.flatMap(([key]) => [
+          { label: `(自动计算总和)${key}`, value: `sum_${key}` },
+          { label: `(自动计算平均)${key}`, value: `avg_${key}` },
+        ]),
+        { label: "总数", value: "total" },
+      ];
     } else {
       return [];
     }
@@ -91,6 +96,23 @@ function ConfigArea({ dataSource }: { dataSource: any[] }) {
                     }
                   }}
                 />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
+              <Form.Item label={"自动过滤筛选数据"} name={"autoFilter"}>
+                <Radio.Group
+                  defaultValue={true}
+                  onChange={(e) => {
+                    setConfig(
+                      produce((config) => {
+                        config.autoFilter = e.target.value;
+                      })
+                    );
+                  }}
+                >
+                  <Radio value={true}>是</Radio>
+                  <Radio value={false}>否</Radio>
+                </Radio.Group>
               </Form.Item>
             </Col>
           </Row>
@@ -145,6 +167,10 @@ function ConfigArea({ dataSource }: { dataSource: any[] }) {
                   mode="multiple"
                   placeholder="请选择Y轴"
                   onChange={(value) => {
+                    if (!value.length) {
+                      message.warning("至少有一个Y轴存在！");
+                      return;
+                    }
                     setConfig(
                       produce((config) => {
                         config.yAxisOptions.field = value;

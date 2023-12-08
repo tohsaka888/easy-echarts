@@ -66,10 +66,10 @@ function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
             },
           },
         ],
-        yAxis: config.yAxisOptions.field.map((item) => ({
-          type: "value",
-          name: item,
-        })),
+        yAxis: [
+          { type: "value", name: "数值" },
+          { type: "value", name: "百分比" },
+        ],
         series: config.yAxisOptions.field.map((item) => ({
           name: item,
           type: "bar",

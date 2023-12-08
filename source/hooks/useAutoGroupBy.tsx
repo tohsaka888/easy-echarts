@@ -1,3 +1,4 @@
+import { useChartConfig } from "@source/ChartConfigProvider";
 import React, { useMemo } from "react";
 
 function useAutoGroupBy<T extends object>(
@@ -5,6 +6,7 @@ function useAutoGroupBy<T extends object>(
   groupBy: keyof T,
   orderBy: (keyof T)[]
 ) {
+  const { autoFilter, yAxisOptions } = useChartConfig();
   return useMemo(() => {
     const groupedData: any[] = [];
     if (!data.length) {
@@ -18,9 +20,9 @@ function useAutoGroupBy<T extends object>(
       );
       if (existedItem) {
         // push order by value
+        existedItem.total++;
         Object.keys(item).forEach((key) => {
           if (typeof item[key] === "number") {
-            existedItem.total++;
             existedItem[`sum_${key}`] += item[key];
             existedItem[`avg_${key}`] = +(
               existedItem[`sum_${key}`] / existedItem.total
@@ -46,7 +48,9 @@ function useAutoGroupBy<T extends object>(
         });
       }
     });
-    return groupedData;
+    return autoFilter
+      ? groupedData.filter((item) => yAxisOptions.field.some((y) => item[y]))
+      : groupedData;
   }, [data, groupBy, orderBy]);
 }
 

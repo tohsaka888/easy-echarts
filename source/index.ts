@@ -1,6 +1,7 @@
 export type BasicChartConfig = {
   title: string;
   height: number;
+  autoFilter: boolean;
 };
 
 export type BarLineChartConfig = {
