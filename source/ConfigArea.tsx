@@ -33,13 +33,18 @@ function ConfigArea({ dataSource }: { dataSource: any[] }) {
 
   const yAxisOptions = useMemo(() => {
     if (dataSource.length) {
-      return Object.entries(dataSource[0]).filter(
-        ([value]) => typeof value === "number"
+      const numberEntries = Object.entries(dataSource[0]).filter(
+        ([_, value]) => typeof value === "number"
       );
+
+      return numberEntries.flatMap(([key]) => [
+        { label: `(自动计算总和)${key}`, value: `sum_${key}` },
+        { label: `(自动计算平均)${key}`, value: `avg_${key}` },
+      ]);
     } else {
       return [];
     }
-  }, [config]);
+  }, [config, dataSource]);
 
   return (
     <>
@@ -126,6 +131,25 @@ function ConfigArea({ dataSource }: { dataSource: any[] }) {
                         })
                       );
                     }
+                  }}
+                />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={8}>
+              <Form.Item label={"设置Y轴"} name={["yAxisOptions", "field"]}>
+                <Select
+                  options={yAxisOptions}
+                  style={{ width: "100%" }}
+                  mode="multiple"
+                  placeholder="请选择Y轴"
+                  onChange={(value) => {
+                    setConfig(
+                      produce((config) => {
+                        config.yAxisOptions.field = value;
+                      })
+                    );
                   }}
                 />
               </Form.Item>

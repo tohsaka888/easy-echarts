@@ -11,7 +11,6 @@ function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
     config.xAxisOptions.field as keyof T,
     []
   );
-  console.log(groupedData);
   useEffect(() => {
     if (chartRef.current) {
       const chart = echarts.init(chartRef.current);

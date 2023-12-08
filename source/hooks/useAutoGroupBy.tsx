@@ -18,23 +18,15 @@ function useAutoGroupBy<T extends object>(
       );
       if (existedItem) {
         // push order by value
-        const calcedExistedItem = Object.entries(existedItem).reduce(
-          (acc, [key, value]) => {
-            if (typeof value === "number") {
-              acc[`sum_${key}`] += value;
-              acc["total"] += 1;
-              acc[`avg_${key}`] = +(acc[`sum_${key}`] / acc["total"]).toFixed(
-                2
-              );
-            }
-            return acc;
-          },
-          {}
-        );
-        existedItem = {
-          ...existedItem,
-          ...calcedExistedItem,
-        };
+        Object.keys(item).forEach((key) => {
+          if (typeof item[key] === "number") {
+            existedItem.total++;
+            existedItem[`sum_${key}`] += item[key];
+            existedItem[`avg_${key}`] = +(
+              existedItem[`sum_${key}`] / existedItem.total
+            ).toFixed(2);
+          }
+        });
       } else {
         // catch all number key
         const additionalData = Object.entries(item).reduce(
