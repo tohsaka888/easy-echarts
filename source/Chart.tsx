@@ -1,15 +1,17 @@
 import React, { useEffect, useRef } from "react";
 import { useChartConfig } from "./ChartConfigProvider";
 import * as echarts from "echarts";
+import useAutoGroupBy from "./hooks/useAutoGroupBy";
 
-type Props = {
-  dataSource: any[];
-};
-
-function Chart({ dataSource }: { dataSource: any[] }) {
+function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
   const chartRef = useRef<HTMLDivElement>(null!);
   const config = useChartConfig();
-
+  const groupedData = useAutoGroupBy(
+    dataSource,
+    config.xAxisOptions.field as keyof T,
+    []
+  );
+  console.log(groupedData);
   useEffect(() => {
     if (chartRef.current) {
       const chart = echarts.init(chartRef.current);
@@ -26,8 +28,8 @@ function Chart({ dataSource }: { dataSource: any[] }) {
         },
         grid: {
           bottom: 8,
-          left: 8,
-          right: 8,
+          left: 16,
+          right: 16,
           top: 60,
           containLabel: true,
         },
@@ -59,7 +61,7 @@ function Chart({ dataSource }: { dataSource: any[] }) {
             axisLabel: {
               rotate: config.xAxisOptions.rotate,
             },
-            data: dataSource.map((data) => data[config.xAxisOptions.field]),
+            data: groupedData.map((data) => data[config.xAxisOptions.field]),
             axisPointer: {
               type: "shadow",
             },
@@ -72,11 +74,11 @@ function Chart({ dataSource }: { dataSource: any[] }) {
         series: config.yAxisOptions.field.map((item) => ({
           name: item,
           type: "bar",
-          data: dataSource.map((data) => data[item]),
+          data: groupedData.map((data) => data[item]),
         })),
       });
     }
-  }, [config]);
+  }, [config, groupedData]);
 
   return (
     <div
