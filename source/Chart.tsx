@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { startTransition, useEffect, useRef, useState } from "react";
 import { useChartConfig } from "./ChartConfigProvider";
 import * as echarts from "echarts";
 import useAutoGroupBy from "./hooks/useAutoGroupBy";
@@ -14,8 +14,8 @@ function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
   useEffect(() => {
     if (chartRef.current) {
       const chart = echarts.init(chartRef.current);
-      // @ts-ignore
-      chart.setOption({
+
+      const options = {
         tooltip: {
           trigger: "axis",
           axisPointer: {
@@ -75,7 +75,20 @@ function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
           type: "bar",
           data: groupedData.map((data) => data[item]),
         })),
+      };
+      // @ts-ignore
+      chart.setOption(options);
+      window.addEventListener("resize", (event) => {
+        startTransition(() => {
+          // @ts-ignore
+          chart.resize(options);
+        });
       });
+      // 组件卸载时销毁图表
+      return () => {
+        chart.dispose();
+        window.removeEventListener("resize", (event) => {});
+      };
     }
   }, [config, groupedData]);
 
@@ -83,8 +96,6 @@ function Chart<T extends object>({ dataSource }: { dataSource: T[] }) {
     <div
       ref={chartRef}
       style={{ height: config.height, border: "1px solid" }}
-      // enforce rerender
-      key={JSON.stringify(config)}
     />
   );
 }
