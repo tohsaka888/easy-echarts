@@ -1,12 +1,14 @@
 export type BasicChartConfig = {
   title: string;
   height: number;
+  autoFilter: boolean;
 };
 
 export type BarLineChartConfig = {
   type: "barLine";
   xAxisOptions: {
     field: string;
+    rotate?: number;
   };
   yAxisOptions: {
     field: string[];

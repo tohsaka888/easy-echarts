@@ -8,8 +8,9 @@ function App() {
     <EasyCharts
       dataSource={dataSource}
       dict={[]}
+      autoFilter={true}
       type="barLine"
-      xAxisOptions={{ field: "project_name" }}
+      xAxisOptions={{ field: "project_name", rotate: 30 }}
       yAxisOptions={{ field: ["bug_all", "bug_resolved"] }}
       title="Test"
       height={500}
