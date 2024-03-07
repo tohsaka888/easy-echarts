@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { BarLineChartConfig, BasicChartConfig } from ".";
+import { BarLineChartConfig, BasicChartConfig } from "..";
 
 type ContextProps = BasicChartConfig & BarLineChartConfig;
 
@@ -8,14 +8,29 @@ const DispatchConfigContext = React.createContext<
   React.Dispatch<React.SetStateAction<ContextProps>>
 >(null!);
 
+export const initialChartConfig: ContextProps = {
+  type: "barLine",
+  title: "基础图表",
+  showLabel: true,
+  labelPosition: "inside",
+  isStack: false,
+  autoFilter: true,
+  xAxisOptions: {
+    field: "",
+  },
+  yAxisOptions: {
+    field: [],
+  },
+};
+
 function ChartConfigProvider({
   children,
-  initialValues,
 }: {
   children: React.ReactNode;
-  initialValues: ContextProps;
+  initialValues?: ContextProps;
 }) {
-  const [chartConfig, setChartConfig] = useState<ContextProps>(initialValues);
+  const [chartConfig, setChartConfig] =
+    useState<ContextProps>(initialChartConfig);
   return (
     <ConfigContext.Provider value={chartConfig}>
       <DispatchConfigContext.Provider value={setChartConfig}>

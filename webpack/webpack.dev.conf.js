@@ -17,7 +17,6 @@ module.exports = merge(baseConfig, {
     open: true,
     allowedHosts: "auto",
     compress: true,
-    magicHtml: true,
     client: {
       progress: true,
       logging: "info",

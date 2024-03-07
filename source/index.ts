@@ -1,11 +1,13 @@
 export type BasicChartConfig = {
   title: string;
-  height: number;
   autoFilter: boolean;
+  showLabel: boolean;
+  labelPosition: "top" | "inside" | "bottom";
 };
 
 export type BarLineChartConfig = {
   type: "barLine";
+  isStack: boolean;
   xAxisOptions: {
     field: string;
     rotate?: number;
@@ -15,10 +17,32 @@ export type BarLineChartConfig = {
   };
 } & BasicChartConfig;
 
-export type EasyChartsProps = {
-  dataSource: ({ color?: string; type: "bar" | "line" | "pie" } & any)[];
-  dict: { field: string; displayName: string }[];
-  type: "barLine" | "pie";
-} & BarLineChartConfig;
+export type DataSourceQuery = {
+  dataSourceType: "new" | "history";
+  startTime: string;
+  dueTime: string;
+  dimension: "Person" | "Project";
+};
+
+export type DataSourceDict = {
+  field: string;
+  displayName: string;
+};
+
+export type EasyChartsProps<T = any> = {
+  initDataSource?: T[];
+  initDict?: { field: string; displayName: string }[];
+  onDataSourceChange(query: DataSourceQuery): Promise<{
+    dataSource: T[];
+    dataDict: DataSourceDict[];
+  }>;
+};
+
+export type ChartData<T = any> = {
+  dataSource: T[];
+  dataDict: DataSourceDict[];
+};
+
+export type ChartConfig = BasicChartConfig & BarLineChartConfig;
 
 export { default as EasyCharts } from "@source/EasyCharts";

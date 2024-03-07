@@ -1,4 +1,4 @@
-import { useChartConfig } from "@source/ChartConfigProvider";
+import { useChartConfig } from "../context/ChartConfigProvider";
 import React, { useMemo } from "react";
 
 function useAutoGroupBy<T extends object>(

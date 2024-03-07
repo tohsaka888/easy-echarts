@@ -68,5 +68,9 @@
   "bugs": {
     "url": "${gitURL}/issues"
   },
-  "homepage": "${gitURL}#readme"
+  "homepage": "${gitURL}#readme",
+  "dependencies": {
+    "@ant-design/icons": "^5.3.1",
+    "foxact": "^0.2.32"
+  }
 }

@@ -1,30 +1,33 @@
 "use client";
 import React, { useMemo } from "react";
-import ChartConfigProvider from "./ChartConfigProvider";
+import ChartConfigProvider from "./context/ChartConfigProvider";
 import ConfigArea from "./ConfigArea";
 import Chart from "./Chart";
 import { EasyChartsProps } from ".";
+import { ChartDataProvider } from "./context/DataDictProvider";
+import PropsProvider from "./context/PropsProvider";
+import { ModalLoadingProvider } from "./context/ModalLoadingProvider";
+import { SegmentedProvider } from "./context/SegmentedStateProvider";
 
-function EasyCharts(initialConfig: EasyChartsProps) {
-  const config: EasyChartsProps = useMemo(() => {
-    return {
-      ...initialConfig,
-      yAxisOptions: {
-        field: initialConfig.yAxisOptions.field.map((field) => {
-          if (field.includes("sum_") || field.includes("average_")) {
-            return field;
-          } else {
-            return "sum_" + field;
-          }
-        }),
-      },
-    };
-  }, [initialConfig]);
+function EasyCharts<T extends object>(props: EasyChartsProps<T>) {
   return (
-    <ChartConfigProvider initialValues={config}>
-      <ConfigArea dataSource={config.dataSource} />
-      <Chart dataSource={config.dataSource} />
-    </ChartConfigProvider>
+    <ChartDataProvider>
+      <ChartConfigProvider>
+        <PropsProvider initialValues={props}>
+          <ModalLoadingProvider>
+            <SegmentedProvider>
+              <ConfigArea>
+                <Chart
+                  initDataSource={props.initDataSource}
+                  key={"config-chart"}
+                />
+              </ConfigArea>
+            </SegmentedProvider>
+          </ModalLoadingProvider>
+          <Chart initDataSource={props.initDataSource} key={"preview-chart"} />
+        </PropsProvider>
+      </ChartConfigProvider>
+    </ChartDataProvider>
   );
 }
 

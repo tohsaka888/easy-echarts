@@ -1,188 +1,111 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
+import { Button, Divider, Modal, Flex, Segmented, Spin } from "antd";
 import {
-  Drawer,
-  Button,
-  Form,
-  Input,
-  Row,
-  Col,
-  InputNumber,
-  Divider,
-  Select,
-  message,
-  Radio,
-} from "antd";
-import { useChartConfig, useDispatchChartConfig } from "./ChartConfigProvider";
-import { produce } from "immer";
+  AppstoreOutlined,
+  CompassOutlined,
+  DatabaseOutlined,
+} from "@ant-design/icons";
+import DataSourceForm from "./components/DataSourceForm";
+import ChartDataForm from "./components/ChartDataForm";
+import ChartStyleForm from "./components/ChartStyleForm";
+import { useModalLoading } from "./context/ModalLoadingProvider";
+import { useCurrent, useSetCurrent } from "./context/SegmentedStateProvider";
+import { useChartData } from "./context/DataDictProvider";
 
-function ConfigArea({ dataSource }: { dataSource: any[] }) {
+function ConfigArea({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState<boolean>(false);
-  const config = useChartConfig();
-  const setConfig = useDispatchChartConfig();
-
-  const xAxisOptions = useMemo(() => {
-    if (dataSource.length) {
-      return Object.entries(dataSource[0])
-        .filter(([key, value]) => typeof value === "string")
-        .map(([key]) => ({
-          label: key,
-          value: key,
-        }));
-    } else {
-      return [];
-    }
-  }, [config]);
-
-  const yAxisOptions = useMemo(() => {
-    if (dataSource.length) {
-      const numberEntries = Object.entries(dataSource[0]).filter(
-        ([_, value]) => typeof value === "number"
-      );
-
-      return [
-        ...numberEntries.flatMap(([key]) => [
-          { label: `(自动计算总和)${key}`, value: `sum_${key}` },
-          { label: `(自动计算平均)${key}`, value: `avg_${key}` },
-        ]),
-        { label: "总数", value: "total" },
-      ];
-    } else {
-      return [];
-    }
-  }, [config, dataSource]);
+  const current = useCurrent();
+  const setCurrent = useSetCurrent();
+  const loading = useModalLoading();
+  const { dataSource } = useChartData();
 
   return (
     <>
       <Button type="primary" onClick={() => setOpen(true)}>
         Open Config
       </Button>
-      <Drawer
+      <Modal
         title="图表动态设置"
         width={"80%"}
         open={open}
-        onClose={() => setOpen(false)}
+        onCancel={() => setOpen(false)}
+        footer={null}
       >
-        <Form layout="vertical" initialValues={config}>
-          <Divider style={{ margin: "0px" }}>基本设置</Divider>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label={"设置图表标题"} name={"title"}>
-                <Input
-                  type="text"
-                  placeholder="请输入图表标题"
-                  onChange={(e) => {
-                    setConfig(
-                      produce((config) => {
-                        config.title = e.target.value;
-                      })
-                    );
-                  }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label={"设置图表高度"} name={"height"}>
-                <InputNumber
-                  style={{ width: "100%" }}
-                  type="text"
-                  placeholder="请输入图表高度"
-                  onChange={(value) => {
-                    if (typeof value === "number") {
-                      setConfig(
-                        produce((config) => {
-                          config.height = value;
-                        })
-                      );
-                    }
-                  }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item label={"自动过滤筛选数据"} name={"autoFilter"}>
-                <Radio.Group
-                  defaultValue={true}
-                  onChange={(e) => {
-                    setConfig(
-                      produce((config) => {
-                        config.autoFilter = e.target.value;
-                      })
-                    );
-                  }}
-                >
-                  <Radio value={true}>是</Radio>
-                  <Radio value={false}>否</Radio>
-                </Radio.Group>
-              </Form.Item>
-            </Col>
-          </Row>
-          <Divider style={{ margin: "0px" }}>X轴设置</Divider>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label={"设置X轴"} name={["xAxisOptions", "field"]}>
-                <Select
-                  options={xAxisOptions}
-                  style={{ width: "100%" }}
-                  placeholder="请选择X轴"
-                  onChange={(value) => {
-                    setConfig(
-                      produce((config) => {
-                        config.xAxisOptions.field = value;
-                      })
-                    );
-                  }}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={8}>
-              <Form.Item
-                label={"设置旋转角度"}
-                name={["xAxisOptions", "rotate"]}
+        <Divider />
+        <Spin
+          spinning={loading}
+          size="large"
+          tip={
+            <div
+              style={{ marginTop: "16px", fontWeight: 900, fontSize: "16px" }}
+            >
+              实时数据分析需要处理大量数据，可能需要花费一段时间，请稍等~
+            </div>
+          }
+        >
+          <Flex>
+            <Flex
+              flex={2}
+              style={{
+                marginRight: "16px",
+                borderRadius: "8px",
+                border: "1px solid #eee",
+              }}
+            >
+              {children}
+            </Flex>
+            <div
+              style={{
+                flex: 1,
+                maxHeight: "500px",
+                height: "500px",
+                overflowY: "auto",
+                padding: "0px 12px",
+              }}
+            >
+              <div
+                style={{
+                  position: "sticky",
+                  top: "0px",
+                  zIndex: 999,
+                  background: "#fff",
+                  paddingBottom: "8px",
+                  borderBottom: "1px solid #eee",
+                }}
               >
-                <InputNumber
-                  style={{ width: "100%" }}
-                  type="text"
-                  min={0}
-                  max={90}
-                  placeholder="请输入图表高度"
+                <Segmented
+                  value={current}
+                  disabled={loading || !dataSource.length}
                   onChange={(value) => {
-                    if (typeof value === "number") {
-                      setConfig(
-                        produce((config) => {
-                          config.xAxisOptions.rotate = value;
-                        })
-                      );
-                    }
+                    // @ts-ignore
+                    setCurrent(value);
                   }}
+                  options={[
+                    {
+                      label: "数据源",
+                      value: "DataSource",
+                      icon: <DatabaseOutlined />,
+                    },
+                    {
+                      label: "类型与数据",
+                      value: "DataType",
+                      icon: <AppstoreOutlined />,
+                    },
+                    {
+                      label: "图表样式",
+                      value: "ChartStyle",
+                      icon: <CompassOutlined />,
+                    },
+                  ]}
                 />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={16}>
-            <Col span={8}>
-              <Form.Item label={"设置Y轴"} name={["yAxisOptions", "field"]}>
-                <Select
-                  options={yAxisOptions}
-                  style={{ width: "100%" }}
-                  mode="multiple"
-                  placeholder="请选择Y轴"
-                  onChange={(value) => {
-                    if (!value.length) {
-                      message.warning("至少有一个Y轴存在！");
-                      return;
-                    }
-                    setConfig(
-                      produce((config) => {
-                        config.yAxisOptions.field = value;
-                      })
-                    );
-                  }}
-                />
-              </Form.Item>
-            </Col>
-          </Row>
-        </Form>
-      </Drawer>
+              </div>
+              <DataSourceForm isShow={current === "DataSource"} />
+              <ChartDataForm isShow={current === "DataType"} />
+              {current === "ChartStyle" && <ChartStyleForm />}
+            </div>
+          </Flex>
+        </Spin>
+      </Modal>
     </>
   );
 }
