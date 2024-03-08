@@ -48,6 +48,8 @@ function ChartDataForm({ isShow }: Props) {
     }
   }, [dataSource]);
 
+  const [form] = Form.useForm();
+
   const defaultConfig: ChartConfig = useMemo(() => {
     if (dataSource.length) {
       const config = {
@@ -60,6 +62,7 @@ function ChartDataForm({ isShow }: Props) {
         },
       };
       setConfig(config);
+      form.setFieldsValue(config);
       return config;
     } else {
       return initialChartConfig;
@@ -69,6 +72,7 @@ function ChartDataForm({ isShow }: Props) {
   return (
     <Form
       layout="vertical"
+      form={form}
       initialValues={defaultConfig}
       style={{
         width: "100%",
@@ -105,7 +109,11 @@ function ChartDataForm({ isShow }: Props) {
         />
       </Form.Item>
 
-      <Form.Item label={"自动过滤筛选数据"} name={"autoFilter"}>
+      <Form.Item
+        label={"自动过滤筛选数据"}
+        name={"autoFilter"}
+        tooltip={"如果Y轴数据全为0，自动从图表中过滤"}
+      >
         <Radio.Group
           defaultValue={true}
           onChange={(e) => {

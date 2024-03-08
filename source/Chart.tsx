@@ -42,7 +42,7 @@ function Chart<T extends object>({ initDataSource, ...props }: ChartProps<T>) {
         grid: {
           bottom: 8,
           left: 16,
-          right: 16,
+          right: 24,
           top: 60,
           containLabel: true,
         },
