@@ -1,5 +1,8 @@
 import React, { startTransition, useEffect, useRef } from "react";
-import { useChartConfig } from "./context/ChartConfigProvider";
+import {
+  useChartConfig,
+  usePreviewChartConfig,
+} from "./context/ChartConfigProvider";
 import * as echarts from "echarts";
 import useAutoGroupBy from "./hooks/useAutoGroupBy";
 import { useChartData } from "./context/DataDictProvider";
@@ -7,19 +10,23 @@ import { Empty, Flex } from "antd";
 
 type ChartProps<T> = {
   initDataSource?: T[];
+  mode: "preview" | "config";
 } & React.HTMLAttributes<HTMLDivElement>;
 
-function Chart<T extends object>({ initDataSource, ...props }: ChartProps<T>) {
+function Chart<T extends object>({
+  initDataSource,
+  mode,
+  ...props
+}: ChartProps<T>) {
   const chartRef = useRef<HTMLDivElement>(null!);
   const { dataDict, dataSource } = useChartData();
-  const config = useChartConfig();
+  const config = mode === "config" ? useChartConfig() : usePreviewChartConfig();
   const groupedData = useAutoGroupBy(
     dataSource || [],
     config.xAxisOptions.field as keyof T,
-    []
+    config.orderBy as (keyof T)[]
   );
 
-  console.log(groupedData.map((data) => data[config.xAxisOptions.field]));
   useEffect(() => {
     if (chartRef.current) {
       const chart = echarts.init(chartRef.current);
@@ -67,6 +74,13 @@ function Chart<T extends object>({ initDataSource, ...props }: ChartProps<T>) {
           top: "top",
           left: "left",
           width: "50%",
+          formatter(name) {
+            const displayName = dataDict.find(
+              (dict) =>
+                dict.field === name.replace("sum_", "").replace("avg_", "")
+            )?.displayName;
+            return displayName || name;
+          },
         },
         xAxis: [
           {
@@ -82,16 +96,41 @@ function Chart<T extends object>({ initDataSource, ...props }: ChartProps<T>) {
         ],
         yAxis: [
           { type: "value", name: "数值" },
-          { type: "value", name: "百分比" },
+          {
+            type: "value",
+            name: "百分比",
+            min: 0,
+            max: 1,
+            alignTicks: true,
+            axisPointer: {
+              label: {
+                formatter: function (params) {
+                  return (params.value * 100).toFixed(0) + "%";
+                },
+              },
+            },
+            axisLabel: {
+              formatter: function (value) {
+                return (value * 100).toFixed(0) + "%";
+              },
+            },
+          },
         ],
         series: config.yAxisOptions.field.map((item) => ({
           name: item,
-          type: "bar",
-          stack: config.isStack,
+          type: !item.includes("_rate") ? "bar" : "line",
+          stack: !item.includes("_rate") ? config.isStack : undefined,
           label: {
             show: config.showLabel,
             position: config.labelPosition,
+            fontSize: config.labelFontSize,
+            formatter: function (params) {
+              return item.includes("_rate")
+                ? (params.value * 100).toFixed(0) + "%"
+                : params.value;
+            },
           },
+          yAxisIndex: !item.includes("_rate") ? 0 : 1,
           data: groupedData.map((data) => data[item]),
         })),
       };
@@ -108,11 +147,13 @@ function Chart<T extends object>({ initDataSource, ...props }: ChartProps<T>) {
 
   return (
     <>
-      {dataSource.length > 0 ? (
+      {dataSource.length > 0 &&
+      config.xAxisOptions.field &&
+      config.yAxisOptions.field ? (
         <div
           ref={chartRef}
           style={{
-            height: "100%",
+            height: "calc(100% - 38px)",
             // border: "1px solid",
             borderRadius: "8px",
             width: "100%",
