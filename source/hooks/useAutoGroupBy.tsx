@@ -6,7 +6,7 @@ function useAutoGroupBy<T extends object>(
   groupBy: keyof T,
   orderBy: (keyof T)[]
 ) {
-  const { autoFilter, yAxisOptions } = useChartConfig();
+  const { autoFilter, yAxisOptions, order, ...config } = useChartConfig();
   return useMemo(() => {
     const groupedData: any[] = [];
     if (!data.length) {
@@ -26,7 +26,7 @@ function useAutoGroupBy<T extends object>(
             existedItem[`sum_${key}`] += item[key];
             existedItem[`avg_${key}`] = +(
               existedItem[`sum_${key}`] / existedItem.total
-            ).toFixed(2);
+            ).toFixed(0);
           }
         });
       } else {
@@ -48,10 +48,17 @@ function useAutoGroupBy<T extends object>(
         });
       }
     });
-    return autoFilter
+    const resultData = autoFilter
       ? groupedData.filter((item) => yAxisOptions.field.some((y) => item[y]))
       : groupedData;
-  }, [data, groupBy, orderBy]);
+    return resultData.sort((item1, item2) => {
+      for (const dimension of orderBy || []) {
+        if (item1[dimension] < item2[dimension]) return order;
+        if (item1[dimension] > item2[dimension]) return -order;
+      }
+      return 0;
+    });
+  }, [data, groupBy, orderBy, autoFilter, order, config]);
 }
 
 export default useAutoGroupBy;
