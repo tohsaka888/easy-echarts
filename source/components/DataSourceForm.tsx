@@ -6,6 +6,10 @@ import { PropsContext } from "@source/context/PropsProvider";
 import { BookOutlined } from "@ant-design/icons";
 import { useSetModalLoading } from "@source/context/ModalLoadingProvider";
 import { useSetCurrent } from "@source/context/SegmentedStateProvider";
+import {
+  initialChartConfig,
+  useDispatchChartConfig,
+} from "@source/context/ChartConfigProvider";
 
 type Props = {
   isShow: boolean;
@@ -17,6 +21,7 @@ function DataSourceForm({ isShow }: Props) {
   const [form] = Form.useForm();
   const setLoading = useSetModalLoading();
   const setCurrent = useSetCurrent();
+  const setChartConfig = useDispatchChartConfig();
 
   return (
     <Form
@@ -74,12 +79,18 @@ function DataSourceForm({ isShow }: Props) {
           try {
             await form.validateFields();
             const values = form.getFieldsValue();
-            const chartData = await onDataSourceChange(values);
-
-            setLoading(true);
+            setChartData({ dataSource: [], dataDict: [] });
 
             try {
-              await setChartData(chartData);
+              setChartConfig(initialChartConfig);
+              setLoading(true);
+              const chartData = await onDataSourceChange(values);
+              chartData.dataDict.push({
+                field: "total",
+                displayName: "总数",
+              });
+              setChartData(chartData);
+
               setCurrent("DataType");
             } catch (error: any) {
               message.error(error.title + error.message);
