@@ -2,7 +2,10 @@ export type BasicChartConfig = {
   title: string;
   autoFilter: boolean;
   showLabel: boolean;
+  labelFontSize: number;
   labelPosition: "top" | "inside" | "bottom";
+  orderBy: string[];
+  order: 1 | -1;
 };
 
 export type BarLineChartConfig = {
