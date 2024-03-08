@@ -1,19 +1,15 @@
-import React, { useState } from "react";
-import { BarLineChartConfig, BasicChartConfig } from "..";
+import { ChartConfig } from "..";
+import { createContextState } from "foxact/context-state";
 
-type ContextProps = BasicChartConfig & BarLineChartConfig;
-
-const ConfigContext = React.createContext<ContextProps>(null!);
-const DispatchConfigContext = React.createContext<
-  React.Dispatch<React.SetStateAction<ContextProps>>
->(null!);
-
-export const initialChartConfig: ContextProps = {
+export const initialChartConfig: ChartConfig = {
   type: "barLine",
   title: "基础图表",
   showLabel: true,
   labelPosition: "inside",
+  order: 1,
+  orderBy: [],
   isStack: false,
+  labelFontSize: 12,
   autoFilter: true,
   xAxisOptions: {
     field: "",
@@ -23,39 +19,20 @@ export const initialChartConfig: ContextProps = {
   },
 };
 
-function ChartConfigProvider({
-  children,
-}: {
-  children: React.ReactNode;
-  initialValues?: ContextProps;
-}) {
-  const [chartConfig, setChartConfig] =
-    useState<ContextProps>(initialChartConfig);
-  return (
-    <ConfigContext.Provider value={chartConfig}>
-      <DispatchConfigContext.Provider value={setChartConfig}>
-        {children}
-      </DispatchConfigContext.Provider>
-    </ConfigContext.Provider>
-  );
-}
+const [ChartConfigProvider, useChartConfig, useDispatchChartConfig] =
+  createContextState<ChartConfig>(initialChartConfig);
 
-export function useChartConfig() {
-  const context = React.useContext(ConfigContext);
-  if (context === undefined) {
-    throw new Error("useChartConfig must be used within a ChartConfigProvider");
-  }
-  return context;
-}
+const [
+  PreviewChartConfigProvider,
+  usePreviewChartConfig,
+  useSetPreviewChartConfig,
+] = createContextState<ChartConfig>(initialChartConfig);
 
-export function useDispatchChartConfig() {
-  const context = React.useContext(DispatchConfigContext);
-  if (context === undefined) {
-    throw new Error(
-      "useDispatchConfig must be used within a ChartConfigProvider"
-    );
-  }
-  return context;
-}
-
-export default ChartConfigProvider;
+export {
+  ChartConfigProvider,
+  useChartConfig,
+  useDispatchChartConfig,
+  PreviewChartConfigProvider,
+  usePreviewChartConfig,
+  useSetPreviewChartConfig,
+};
