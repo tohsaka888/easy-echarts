@@ -6,7 +6,7 @@ import {
 import { useChartData } from "@source/context/DataDictProvider";
 import { Form, Input, InputNumber, Radio, Select, message } from "antd";
 import { produce } from "immer";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ChartConfig } from "..";
 
 type Props = {
@@ -21,14 +21,19 @@ function ChartDataForm({ isShow }: Props) {
     if (dataSource.length) {
       return Object.entries(dataSource[0])
         .filter(([key, value]) => typeof value === "string")
-        .map(([key]) => ({
-          label: key,
-          value: key,
-        }));
+        .map(([key]) => {
+          const label = dataDict.find((item) => item.field === key);
+          return {
+            label: label ? label.displayName : key,
+            value: key,
+          };
+        });
     } else {
       return [];
     }
   }, [dataSource]);
+  const [form] = Form.useForm();
+  const yAxises = Form.useWatch(["yAxisOptions", "field"], form) || [];
 
   const yAxisOptions = useMemo(() => {
     if (dataSource.length) {
@@ -37,18 +42,38 @@ function ChartDataForm({ isShow }: Props) {
       );
 
       return [
-        ...numberEntries.flatMap(([key]) => [
-          { label: `(sum)${key}`, value: `sum_${key}` },
-          { label: `(avg)${key}`, value: `avg_${key}` },
-        ]),
+        ...numberEntries.flatMap(([key]) => {
+          const label = dataDict.find((item) => item.field === key);
+          const sumData = {
+            label: label
+              ? "(sum)" +
+                dataDict.find((item) => item.field === key)?.displayName
+              : `(sum)${key}`,
+            value: `sum_${key}`,
+          };
+          const avgData = {
+            label: label
+              ? "(avg)" +
+                dataDict.find((item) => item.field === key)?.displayName
+              : `(avg)${key}`,
+            value: `avg_${key}`,
+          };
+          return !key.includes("_rate") ? [sumData, avgData] : [avgData];
+        }),
         { label: "总数", value: "total" },
-      ];
+      ].map((yAxis) => {
+        const disabled = yAxises.some(
+          (item: string) =>
+            yAxis.value.replace("sum_", "").replace("avg_", "") ===
+              item.replace("sum_", "").replace("avg_", "") &&
+            yAxis.value !== item
+        );
+        return { ...yAxis, disabled };
+      });
     } else {
       return [];
     }
-  }, [dataSource]);
-
-  const [form] = Form.useForm();
+  }, [dataSource, yAxises]);
 
   const defaultConfig: ChartConfig = useMemo(() => {
     if (dataSource.length) {
@@ -61,13 +86,16 @@ function ChartDataForm({ isShow }: Props) {
           field: ["total"],
         },
       };
-      setConfig(config);
-      form.setFieldsValue(config);
       return config;
     } else {
       return initialChartConfig;
     }
   }, [dataSource]);
+
+  useEffect(() => {
+    form.setFieldsValue(defaultConfig);
+    setConfig(defaultConfig);
+  }, [defaultConfig]);
 
   return (
     <Form
@@ -80,20 +108,6 @@ function ChartDataForm({ isShow }: Props) {
         display: isShow ? "block" : "none",
       }}
     >
-      <Form.Item label={"设置图表标题"} name={"title"}>
-        <Input
-          type="text"
-          placeholder="请输入图表标题"
-          onChange={(e) => {
-            setConfig(
-              produce((config) => {
-                config.title = e.target.value;
-              })
-            );
-          }}
-        />
-      </Form.Item>
-
       <Form.Item label={"设置图表类型"} name={"type"}>
         <Select
           options={[{ label: "柱状图+折线图", value: "barLine" }]}
@@ -115,7 +129,6 @@ function ChartDataForm({ isShow }: Props) {
         tooltip={"如果Y轴数据全为0，自动从图表中过滤"}
       >
         <Radio.Group
-          defaultValue={true}
           onChange={(e) => {
             setConfig(
               produce((config) => {
@@ -167,15 +180,26 @@ function ChartDataForm({ isShow }: Props) {
         />
       </Form.Item>
 
-      <Form.Item label={"设置Y轴"} name={["yAxisOptions", "field"]}>
+      <Form.Item
+        label={"设置Y轴"}
+        name={["yAxisOptions", "field"]}
+        tooltip={
+          "同一字段自动计算的sum和avg不能共存，总数字段为当前维度下数据的数量"
+        }
+      >
         <Select
           options={yAxisOptions}
+          maxCount={5}
           style={{ width: "100%" }}
           mode="multiple"
           placeholder="请选择Y轴"
-          onChange={(value) => {
+          onChange={(value: string[]) => {
             if (!value.length) {
               message.warning("至少有一个Y轴存在！");
+              return;
+            }
+            if (value.length > 5) {
+              message.warning("最多只能有5个Y轴！");
               return;
             }
             setConfig(
@@ -187,6 +211,42 @@ function ChartDataForm({ isShow }: Props) {
             );
           }}
         />
+      </Form.Item>
+      <Form.Item label={"排序维度"} name={"orderBy"}>
+        <Select
+          options={yAxises.map((yAxis: string) => ({
+            label:
+              dataDict.find(
+                (item) =>
+                  item.field === yAxis.replace("sum_", "").replace("avg_", "")
+              )?.displayName || yAxis,
+            value: yAxis,
+          }))}
+          style={{ width: "100%" }}
+          mode="multiple"
+          placeholder="排序顺序"
+          onChange={(value) => {
+            setConfig(
+              produce((config) => {
+                config.orderBy = value;
+              })
+            );
+          }}
+        />
+      </Form.Item>
+      <Form.Item label="排序顺序" name={"order"}>
+        <Radio.Group
+          onChange={(e) => {
+            setConfig(
+              produce((config) => {
+                config.order = e.target.value;
+              })
+            );
+          }}
+        >
+          <Radio value={1}>降序</Radio>
+          <Radio value={-1}>升序</Radio>
+        </Radio.Group>
       </Form.Item>
     </Form>
   );
