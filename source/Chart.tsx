@@ -45,6 +45,27 @@ function Chart<T extends object>({
               color: "#999",
             },
           },
+          formatter(params) {
+            const list = params
+              .map((param) => {
+                const name = param.seriesName;
+                const value = param.value;
+                const color = param.color;
+                const displayName = dataDict.find(
+                  (dict) =>
+                    dict.field === name.replace("sum_", "").replace("avg_", "")
+                )?.displayName;
+                return (
+                  `<span style="color: ${color}">` +
+                  (displayName || name) +
+                  ":" +
+                  value +
+                  "</span>"
+                );
+              })
+              .join("<br />");
+            return `<div>${list}</div>`;
+          },
         },
         grid: {
           bottom: 8,
