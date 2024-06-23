@@ -4,8 +4,8 @@
   "private": false,
   "devDependencies": {
     "@nuxt/friendly-errors-webpack-plugin": "^2.5.2",
-    "@swc/cli": "0.3.12",
-    "@swc/core": "1.6.3",
+    "@swc/cli": "0.3.14",
+    "@swc/core": "1.6.5",
     "@swc/helpers": "0.5.11",
     "@types/echarts": "^4.9.21",
     "@types/node": "^20.0.0",
