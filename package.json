@@ -27,7 +27,7 @@
     "ttypescript": "^1.5.15",
     "typescript": "5.7.2",
     "typescript-transform-paths": "^3.4.6",
-    "webpack": "5.96.1",
+    "webpack": "5.97.1",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.1.0",
     "webpack-merge": "6.0.1",
