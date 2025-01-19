@@ -7,7 +7,7 @@
     "@swc/cli": "0.6.0",
     "@swc/core": "1.10.7",
     "@swc/helpers": "0.5.15",
-    "@types/echarts": "^4.9.21",
+    "@types/echarts": "^5.0.0",
     "@types/node": "^22.0.0",
     "@types/react": "19.0.7",
     "@types/react-dom": "19.0.3",
