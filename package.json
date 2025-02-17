@@ -9,7 +9,7 @@
     "@swc/helpers": "0.5.15",
     "@types/echarts": "^5.0.0",
     "@types/node": "^22.0.0",
-    "@types/react": "19.0.8",
+    "@types/react": "19.0.9",
     "@types/react-dom": "19.0.3",
     "antd": "^5.11.1",
     "autoprefixer": "10.4.20",
