@@ -70,7 +70,7 @@
   },
   "homepage": "${gitURL}#readme",
   "dependencies": {
-    "@ant-design/icons": "^5.3.1",
+    "@ant-design/icons": "^6.0.0",
     "foxact": "^0.2.32"
   }
 }
