@@ -12,7 +12,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "antd": "^6.0.0",
-    "autoprefixer": "10.4.27",
+    "autoprefixer": "10.5.0",
     "css-loader": "7.1.4",
     "css-minimizer-webpack-plugin": "8.0.0",
     "echarts": "^6.0.0",
