@@ -8,7 +8,7 @@
     "@swc/core": "1.15.43",
     "@swc/helpers": "0.5.23",
     "@types/echarts": "^5.0.0",
-    "@types/node": "^25.0.0",
+    "@types/node": "^26.0.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
     "antd": "^6.0.0",
